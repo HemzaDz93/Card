@@ -56,7 +56,9 @@ let appState = {
     },
     exportHistory: [],
     draggedCard: null,
-    draggedSide: null
+    draggedSide: null,
+    batchRows: 4,      // عدد الصفوف في الدفعة
+    batchCols: 2       // عدد الأعمدة في الدفعة
 };
 
 // ===== بدء التطبيق =====
@@ -81,6 +83,10 @@ function setupEventListeners() {
     document.getElementById('previewBatchBtn').addEventListener('click', showBatchPreview);
     document.getElementById('printBatchBtn').addEventListener('click', printBatch);
     document.getElementById('exportBatchPdfBtn').addEventListener('click', exportBatchToPDF);
+    
+    // إعدادات تخطيط الدفعة (جديد)
+    document.getElementById('batchRows')?.addEventListener('change', handleBatchLayoutChange);
+    document.getElementById('batchCols')?.addEventListener('change', handleBatchLayoutChange);
     
     // تحسين تجربة الدفع بإضافة drag & drop
     setupBatchDragAndDrop();
@@ -945,7 +951,11 @@ function showBatchPreview() {
     const container = document.getElementById('batchPagesContainer');
     container.innerHTML = '';
     
-    const cardsPerPage = 8; // 8 بطاقات لكل صفحة (2×4)
+    // استخدام القيم الديناميكية من الإعدادات
+    const rows = appState.batchRows || 4;
+    const cols = appState.batchCols || 2;
+    const cardsPerPage = rows * cols;
+    
     const totalCards = Math.max(
         appState.batchImages.front.length,
         appState.batchImages.back.length
@@ -963,14 +973,14 @@ function showBatchPreview() {
     
     // إنشاء صفحات الصور الأمامية
     for (let page = 0; page < Math.ceil(appState.batchImages.front.length / cardsPerPage); page++) {
-        const pageHtml = createBatchPage(page, 'front', cardsPerPage);
+        const pageHtml = createBatchPage(page, 'front', cardsPerPage, rows, cols);
         container.innerHTML += pageHtml;
     }
     
     // إنشاء صفحات الصور الخلفية (إن وجدت)
     if (hasBackImages) {
         for (let page = 0; page < Math.ceil(appState.batchImages.back.length / cardsPerPage); page++) {
-            const pageHtml = createBatchPage(page, 'back', cardsPerPage);
+            const pageHtml = createBatchPage(page, 'back', cardsPerPage, rows, cols);
             container.innerHTML += pageHtml;
         }
     }
@@ -978,7 +988,7 @@ function showBatchPreview() {
     const frontPages = Math.ceil(appState.batchImages.front.length / cardsPerPage);
     const backPages = hasBackImages ? Math.ceil(appState.batchImages.back.length / cardsPerPage) : 0;
     const totalPages = frontPages + backPages;
-    updateStatus(`معاينة ${totalCards} صورة في ${totalPages} صفحة(ات) ✓`);
+    updateStatus(`معاينة ${totalCards} صورة في ${totalPages} صفحة(ات) (${rows}×${cols}) ✓`);
     
     // إضافة drag and drop handlers بعد إنشاء المعاينة
     setupCardDragAndDrop();
@@ -1137,19 +1147,19 @@ function setupCardDragAndDrop() {
 }
 
 // ===== إنشاء صفحة معاينة =====
-function createBatchPage(pageNumber, side, cardsPerPage) {
+function createBatchPage(pageNumber, side, cardsPerPage, rows, cols) {
     const images = appState.batchImages[side] || [];
     const startIdx = pageNumber * cardsPerPage;
     const endIdx = Math.min(startIdx + cardsPerPage, images.length);
     const pageImagesCount = endIdx - startIdx;
     
+    // استخدام القيم الممرورة أو القيم الافتراضية
+    rows = rows || 4;
+    cols = cols || 2;
+    
     const sideLabel = side === 'front' ? '🖼️ الصور الأمامية' : '🖼️ الصور الخلفية';
     
     let gridHtml = '';
-    
-    // إنشاء شبكة 2×4 (8 بطاقات)
-    const rows = 4;
-    const cols = 2;
     
     if (side === 'front') {
         // الصور الأمامية: من اليسار إلى اليمين (LTR)
@@ -1223,7 +1233,7 @@ function createBatchPage(pageNumber, side, cardsPerPage) {
                 <span>${sideLabel}</span>
                 <span style="margin-right: 1rem; font-size: 0.9rem; color: #6b7280;">الصفحة ${pageNum} من ${totalPages}</span>
             </div>
-            <div class="batch-page-grid">
+            <div class="batch-page-grid" style="--grid-cols: ${cols}; --grid-rows: ${rows};">
                 ${gridHtml}
             </div>
             <div style="text-align: center; margin-top: 0.75rem; font-size: 0.85rem; color: #6b7280;">
@@ -1296,11 +1306,10 @@ function printBatch() {
     const printWindow = window.open('', '', 'height=600,width=800');
     const printDoc = printWindow.document;
     
-    // استخدام نفس تخطيط المعاينة: 8 بطاقات في الصفحة (شبكة 2×4)
-    // 2 عمود × 4 صفوف = 8 بطاقات
-    const cardsPerPage = 8;
-    const rows = 4;
-    const cols = 2;
+    // استخدام نفس التخطيط من الإعدادات الديناميكية
+    const rows = appState.batchRows || 4;
+    const cols = appState.batchCols || 2;
+    const cardsPerPage = rows * cols;
     
     // سمات البطاقة ISO 7810 القياسية
     const cardWidth = 85.6; // mm
@@ -1443,10 +1452,10 @@ async function exportBatchToPDF() {
             format: 'a4'
         });
         
-        // استخدام نفس تخطيط المعاينة: 8 بطاقات في الصفحة (شبكة 2×4)
-        const cardsPerPage = 8;
-        const rows = 4;
-        const cols = 2;
+        // استخدام نفس التخطيط من الإعدادات الديناميكية
+        const rows = appState.batchRows || 4;
+        const cols = appState.batchCols || 2;
+        const cardsPerPage = rows * cols;
         
         // سمات البطاقة ISO 7810 القياسية
         const cardWidth = 85.6; // mm
@@ -1699,11 +1708,37 @@ function applyPredefinedTemplate() {
     updateStatus('تم تطبيق القالب الجاهز ✓');
 }
 
+// ===== معالج تغيير تخطيط الدفعة =====
+function handleBatchLayoutChange() {
+    const rows = parseInt(document.getElementById('batchRows')?.value) || 4;
+    const cols = parseInt(document.getElementById('batchCols')?.value) || 2;
+    
+    // تحديث appState
+    appState.batchRows = rows;
+    appState.batchCols = cols;
+    
+    // حفظ إلى localStorage
+    localStorage.setItem('batchRows', rows.toString());
+    localStorage.setItem('batchCols', cols.toString());
+    
+    // إذا كانت هناك صور مرفوعة، أعد المعاينة
+    if (appState.batchImages.front.length > 0 || appState.batchImages.back.length > 0) {
+        showBatchPreview();
+    }
+    
+    updateStatus(`تم تحديث التخطيط: ${rows} صف × ${cols} عمود (${rows * cols} بطاقة لكل ورقة) ✓`);
+}
+
 // ===== إحصائيات الدفعة =====
 function updateBatchStatistics() {
     const frontCount = appState.batchImages.front.length;
     const backCount = appState.batchImages.back.length;
-    const cardsPerPage = 8;
+    
+    // استخدام القيم الديناميكية
+    const rows = appState.batchRows || 4;
+    const cols = appState.batchCols || 2;
+    const cardsPerPage = rows * cols;
+    
     const pagesNeeded = Math.ceil(Math.max(frontCount, backCount) / cardsPerPage);
     
     let totalSize = 0;
@@ -1804,6 +1839,20 @@ function loadSavedData() {
         } catch (e) {
             console.warn('خطأ في تحميل سجل التصدير');
         }
+    }
+    
+    // تحميل إعدادات تخطيط الدفعة (جديد)
+    const savedRows = localStorage.getItem('batchRows');
+    const savedCols = localStorage.getItem('batchCols');
+    if (savedRows) appState.batchRows = parseInt(savedRows);
+    if (savedCols) appState.batchCols = parseInt(savedCols);
+    
+    // تحديث قيم الإدخالات
+    if (document.getElementById('batchRows')) {
+        document.getElementById('batchRows').value = appState.batchRows || 4;
+    }
+    if (document.getElementById('batchCols')) {
+        document.getElementById('batchCols').value = appState.batchCols || 2;
     }
     
     loadDarkModePreference();

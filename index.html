@@ -26,6 +26,23 @@
             </div>
         </header>
 
+        <!-- رسالة الأمان والخصوصية -->
+        <div class="security-notice">
+            <div class="security-notice-content">
+                <span class="security-icon">🔒</span>
+                <div class="security-text">
+                    <strong>ملاحظة أمان وخصوصية مهمة:</strong>
+                    <ul>
+                        <li>✅ جميع البيانات تُعالج <strong>محلياً على جهازك فقط</strong> - لا توجد عمليات إرسال لأي خادم</li>
+                        <li>✅ صورك <strong>لا تترك جهازك أبداً</strong> - معالجة 100% محلية</li>
+                        <li>✅ الموقع يستخدم <strong>HTTPS مشفر</strong> لأعلى مستويات الأمان</li>
+                        <li>⚠️ على جهاز مشترك، استخدم <strong>الوضع الخاص (Private/Incognito)</strong> واحذف بيانات المتصفح بعد الاستخدام</li>
+                    </ul>
+                    <small style="opacity: 0.8; margin-top: 0.5rem;">اقرأ المزيد في قسم "المساعدة" 👇</small>
+                </div>
+            </div>
+        </div>
+
         <!-- القسم الرئيسي -->
         <div class="main-content">
             <!-- الجانب الأيسر: لوحة التحكم -->
@@ -147,6 +164,25 @@
 
                     <button id="copyFrontToBackBtn" class="btn-secondary" style="margin-bottom: 1rem;">📋 نسخ الأمام للخلف</button>
                     <button id="resetImageFilters" class="btn-secondary">🔄 إعادة تعيين الفلاتر</button>
+
+                    <!-- إعدادات تخطيط الدفعة -->
+                    <h4 style="margin-top: 1.5rem; margin-bottom: 1rem; border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5rem;">📄 إعدادات تخطيط الدفعة</h4>
+                    
+                    <div class="form-group">
+                        <label>عدد الصفوف (Rows):</label>
+                        <input type="number" id="batchRows" min="1" max="10" value="4" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px;">
+                        <small style="color: #6b7280; margin-top: 0.25rem; display: block;">عدد الصفوف في كل ورقة (من 1 إلى 10)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>عدد الأعمدة (Columns):</label>
+                        <input type="number" id="batchCols" min="1" max="10" value="2" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px;">
+                        <small style="color: #6b7280; margin-top: 0.25rem; display: block;">عدد الأعمدة في كل ورقة (من 1 إلى 10)</small>
+                    </div>
+
+                    <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 0.75rem; border-radius: 4px; margin-bottom: 1rem; font-size: 0.9rem;">
+                        📌 <strong>ملاحظة:</strong> عند تغيير الصفوف والأعمدة، ستنعدل معاينة الدفعة والطباعة تلقائياً. العدد الإجمالي للبطاقات = الصفوف × الأعمدة
+                    </div>
 
                     <!-- القوالب الجاهزة -->
                     <h4 style="margin-top: 1.5rem; margin-bottom: 1rem; border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5rem;">📋 قوالب جاهزة</h4>
@@ -321,6 +357,18 @@
                 <div style="background: #f3f4f6; padding: 0.75rem; border-radius: 4px; margin-top: 0.5rem;">
                     <div>Ctrl+S: حفظ القالب</div>
                     <div>Shift+C: نسخ الأمام للخلف</div>
+                </div>
+                <h4 style="margin-top: 1.5rem; color: #10b981;">🔒 الأمان والخصوصية:</h4>
+                <ul style="margin-right: 1rem;">
+                    <li><strong>معالجة محلية 100%:</strong> جميع البيانات تُعالج على جهازك فقط، لا ترسل لأي خادم</li>
+                    <li><strong>صورك آمنة:</strong> الصور لا تترك جهازك أبداً - معالجة في المتصفح فقط</li>
+                    <li><strong>تشفير HTTPS:</strong> الموقع يستخدم اتصال آمن مشفر</li>
+                    <li><strong>على جهاز مشترك:</strong> استخدم الوضع الخاص (Private/Incognito) واحذف البيانات بعد الاستخدام</li>
+                    <li><strong>localStorage:</strong> البيانات المحفوظة (الإعدادات، القوالب) تُخزن محلياً فقط</li>
+                    <li><strong>بلا متتبعات:</strong> لا توجد أي خدمات تحليلات أو متتبعات في الموقع</li>
+                </ul>
+                <div style="background: #d1fae5; border-left: 3px solid #10b981; padding: 0.75rem; border-radius: 4px; margin-top: 1rem;">
+                    <strong style="color: #047857;">اطمئن:</strong> هذا الموقع يحترم خصوصيتك بنسبة 100%. استخدم بثقة! ✓
                 </div>
             </div>
         </div>
