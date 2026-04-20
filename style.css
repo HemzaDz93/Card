@@ -54,70 +54,46 @@ body {
     opacity: 0.9;
 }
 
-/* ===== رسالة الأمان والخصوصية ===== */
-.security-notice {
-    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
-    border-left: 5px solid #10b981;
-    margin: 0 0 2rem 0;
+/* ===== شريط الأمان والخصوصية ===== */
+.security-banner {
+    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+    border-left: 4px solid #059669;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
-    overflow: hidden;
-}
-
-.security-notice-content {
-    display: flex;
-    gap: 1rem;
     padding: 1.25rem;
-    align-items: flex-start;
+    margin: 0 auto 2rem;
+    max-width: 1600px;
+    box-shadow: 0 2px 8px rgba(5, 150, 105, 0.1);
 }
 
-.security-icon {
-    font-size: 2rem;
-    flex-shrink: 0;
-}
-
-.security-text {
-    flex: 1;
-}
-
-.security-text strong {
-    color: #047857;
-    font-weight: 600;
-}
-
-.security-text ul {
-    list-style: none;
-    padding: 0;
-    margin: 0.5rem 0;
-}
-
-.security-text li {
-    color: #065f46;
-    margin: 0.4rem 0;
-    padding-left: 0;
-    line-height: 1.6;
-}
-
-.security-text li strong {
+.security-banner h3 {
     color: #047857;
 }
 
-/* النمط المظلم */
-body.dark-mode .security-notice {
+.security-banner ul li {
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.security-banner ul li strong {
+    color: #059669;
+}
+
+/* الوضع المظلم لشريط الأمان */
+body.dark-mode .security-banner {
     background: linear-gradient(135deg, #064e3b, #047857);
     border-left-color: #10b981;
 }
 
-body.dark-mode .security-text {
-    color: #d1fae5;
-}
-
-body.dark-mode .security-text strong {
+body.dark-mode .security-banner h3 {
     color: #a7f3d0;
 }
 
-body.dark-mode .security-text li {
-    color: #d1fae5;
+body.dark-mode .security-banner ul li {
+    color: #e0e7f0;
+}
+
+body.dark-mode .security-banner ul li strong {
+    color: #6ee7b7;
 }
 
 /* ===== الحاوية الرئيسية ===== */
@@ -661,8 +637,8 @@ body.dark-mode .security-text li {
 
 .batch-page-grid {
     display: grid;
-    grid-template-columns: repeat(var(--grid-cols, 2), 1fr);
-    grid-template-rows: repeat(var(--grid-rows, 4), 1fr);
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(4, 1fr);
     gap: 0.5rem;
     width: fit-content;
     margin: 0 auto;
