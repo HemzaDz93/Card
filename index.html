@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>طباعة بطاقات الهوية - ID Card Printer</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Fabric.js لتحرير الصور -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+    <!-- html2canvas لتحويل الصفحة إلى صورة -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- jsPDF لإنشاء ملفات PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- رأس الصفحة -->
+        <header class="header">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1>🎫  طباعة بطاقات الهوية التكوين المهني والتمهين </h1>
+                    <p>ID Card Design Studio - تصميم وطباعة بطاقات الهوية بدقة عالية</p>
+                    <p> تصميم : بن سليليح المسعود</p>
+                </div>
+                <button id="darkModeToggle" class="dark-mode-btn" title="تبديل الوضع المظلم">🌙</button>
+            </div>
+        </header>
+
+        <!-- القسم الرئيسي -->
+        <div class="main-content">
+            <!-- الجانب الأيسر: لوحة التحكم -->
+            <aside class="control-panel">
+                <!-- تبويبات التحكم -->
+                <div class="tabs">
+                    <button class="tab-button active" data-tab="batch">📚 دفعة</button>
+                    <button class="tab-button" data-tab="settings">⚙️ الإعدادات</button>
+                    <button class="tab-button" data-tab="text">✏️ النصوص</button>
+                    <button class="tab-button" data-tab="export">💾 التصدير</button>
+                </div>
+
+                <!-- تبويب الدفعة (مجموعة البطاقات) -->
+                <div class="tab-content active" id="batch-tab">
+                    <h3>📚 طباعة دفعة من البطاقات</h3>
+                    
+                    <div class="form-group">
+                        <label>رفع مجموعة من صور البطاقات الأمامية:</label>
+                        <label for="batchFrontImages" class="file-input-wrapper-multi" style="cursor: pointer; display: block;">
+                            <span>اختر عدة صور أمامية... (اضغط Ctrl للتعديد)</span>
+                            <input type="file" id="batchFrontImages" accept="image/*" multiple class="file-input" />
+                        </label>
+                        <small style="color: #6b7280; margin-top: 0.5rem; display: block;">يمكنك اختيار عدة صور في نفس الوقت</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>رفع مجموعة من صور البطاقات الخلفية:</label>
+                        <label for="batchBackImages" class="file-input-wrapper-multi" style="cursor: pointer; display: block;">
+                            <span>اختر عدة صور خلفية... (اختياري)</span>
+                            <input type="file" id="batchBackImages" accept="image/*" multiple class="file-input" />
+                        </label>
+                        <small style="color: #6b7280; margin-top: 0.5rem; display: block;">يمكن تركه فارغاً إذا كنت تريد الجانب الأمامي فقط</small>
+                    </div>
+
+                    <!-- إحصائيات الدفعة -->
+                    <div id="batchStats" style="background: #e0e7ff; border-radius: 8px; padding: 1rem; margin: 1rem 0; display: none;">
+                        <h4 style="margin-bottom: 0.75rem; color: var(--primary-color);">📊 إحصائيات الدفعة</h4>
+                        <div style="font-size: 0.9rem; line-height: 1.8;">
+                            <div>🖼️ عدد الصور الأمامية: <strong id="statsFrontCount">0</strong></div>
+                            <div>🔙 عدد الصور الخلفية: <strong id="statsBackCount">0</strong></div>
+                            <div>📄 عدد الصفحات المطلوبة: <strong id="statsPagesCount">0</strong></div>
+                            <div>📦 حجم الملف التقريبي: <strong id="statsFileSize">0 KB</strong></div>
+                        </div>
+                    </div>
+
+                    <!-- معاينة الدفعات في صفحات -->
+                    <div class="form-group">
+                        <label>معاينة الصور المرفوعة:</label>
+                        <div id="batchPagesContainer" style="margin-top: 1rem;">
+                            <!-- ستتم إضافة الصفحات هنا ديناميكياً -->
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <button id="clearBatchBtn" class="btn-secondary">🗑️ مسح جميع الصور</button>
+                        <button id="previewBatchBtn" class="btn-secondary">👁️ معاينة شاملة</button>
+                        <button id="printBatchBtn" class="btn-primary btn-large" style="flex: 1;">🖨️ طباعة الدفعة</button>
+                        <button id="exportBatchPdfBtn" class="btn-primary btn-large" style="flex: 1;">📄 تصدير PDF</button>
+                    </div>
+                </div>
+
+                <!-- تبويب الإعدادات -->
+                <div class="tab-content" id="settings-tab">
+                    <h3>إعدادات البطاقة</h3>
+                    
+                    <div class="form-group">
+                        <label>الجانب المعروض:</label>
+                        <select id="sideSelect">
+                            <option value="front">الأمام (Front)</option>
+                            <option value="back">الخلف (Back)</option>
+                        </select>
+                    </div>
+
+                    <!-- أدوات ضبط الصورة -->
+                    <div class="form-group">
+                        <label>تكبير/تصغير (Zoom):</label>
+                        <input type="range" id="zoomSlider" min="0.5" max="3" step="0.1" value="1">
+                        <span id="zoomValue">100%</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>الدوران (Rotation):</label>
+                        <input type="range" id="rotationSlider" min="0" max="360" step="1" value="0">
+                        <span id="rotationValue">0°</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>الإزاحة الأفقية (X):</label>
+                        <input type="range" id="offsetXSlider" min="-50" max="50" step="1" value="0">
+                        <span id="offsetXValue">0</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>الإزاحة العمودية (Y):</label>
+                        <input type="range" id="offsetYSlider" min="-50" max="50" step="1" value="0">
+                        <span id="offsetYValue">0</span>
+                    </div>
+
+                    <!-- قسم تحسين جودة الصور -->
+                    <h4 style="margin-top: 1.5rem; margin-bottom: 1rem; border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5rem;">🎨 تحسين الصورة</h4>
+                    
+                    <div class="form-group">
+                        <label>السطوع (Brightness):</label>
+                        <input type="range" id="brightnessSlider" min="-50" max="50" step="1" value="0">
+                        <span id="brightnessValue">0</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>التباين (Contrast):</label>
+                        <input type="range" id="contrastSlider" min="-50" max="50" step="1" value="0">
+                        <span id="contrastValue">0</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>الإشباع (Saturation):</label>
+                        <input type="range" id="saturationSlider" min="-100" max="100" step="1" value="0">
+                        <span id="saturationValue">0</span>
+                    </div>
+
+                    <button id="copyFrontToBackBtn" class="btn-secondary" style="margin-bottom: 1rem;">📋 نسخ الأمام للخلف</button>
+                    <button id="resetImageFilters" class="btn-secondary">🔄 إعادة تعيين الفلاتر</button>
+
+                    <!-- القوالب الجاهزة -->
+                    <h4 style="margin-top: 1.5rem; margin-bottom: 1rem; border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5rem;">📋 قوالب جاهزة</h4>
+                    
+                    <div class="form-group">
+                        <label>اختر قالباً:</label>
+                        <select id="predefinedTemplates">
+                            <option value="">-- لا يوجد --</option>
+                            <option value="membership">🎟️ بطاقة عضوية</option>
+                            <option value="employee">👔 بطاقة موظف</option>
+                            <option value="student">🎓 بطاقة طالب</option>
+                            <option value="conference">🖼️ بطاقة مؤتمر</option>
+                        </select>
+                    </div>
+
+                    <!-- خيارات إضافية -->
+                    <h4 style="margin-top: 1.5rem; margin-bottom: 1rem; border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5rem;">⚙️ خيارات</h4>
+                    
+                    <div class="checkbox-group">
+                        <label>
+                            <input type="checkbox" id="showGrid"> 🔲 عرض الشبكة المساعدة
+                        </label>
+                        <label>
+                            <input type="checkbox" id="showMarks"> 📍 عرض علامات التسجيل
+                        </label>
+                        <label>
+                            <input type="checkbox" id="flipHorizontal"> ↔️ عكس أفقياً
+                        </label>
+                        <label>
+                            <input type="checkbox" id="flipVertical"> ↕️ عكس عمودياً
+                        </label>
+                    </div>
+
+                    <!-- زر إعادة تعيين الإعدادات -->
+                    <button id="resetSettingsBtn" class="btn-secondary">⚙️ إعادة تعيين الإعدادات</button>
+                </div>
+
+                <!-- تبويب النصوص -->
+                <div class="tab-content" id="text-tab">
+                    <h3>إضافة النصوص</h3>
+                    
+                    <div id="textFieldsContainer">
+                        <!-- سيتم إضافة حقول النصوص هنا ديناميكياً -->
+                    </div>
+
+                    <button id="addTextField" class="btn-secondary">+ إضافة حقل نص</button>
+                    <button id="clearAllText" class="btn-secondary">🗑️ مسح جميع النصوص</button>
+                </div>
+
+                <!-- تبويب التصدير -->
+                <div class="tab-content" id="export-tab">
+                    <h3>خيارات التصدير والطباعة</h3>
+                    
+                    <div class="form-group">
+                        <label>عدد النسخ على الصفحة الواحدة:</label>
+                        <input type="number" id="copiesPerPage" min="1" max="10" value="1">
+                    </div>
+
+                    <div class="checkbox-group">
+                        <label>
+                            <input type="checkbox" id="includeBleed" checked> ➕ إضافة حد الطباعة (Bleed)
+                        </label>
+                        <label>
+                            <input type="checkbox" id="centerCrop"> 🎯 توسيط وقص
+                        </label>
+                    </div>
+
+                    <!-- أزرار التصدير -->
+                    <button id="exportPdfBtn" class="btn-primary btn-large">📄 تصدير PDF</button>
+                    <button id="exportPngBtn" class="btn-secondary">🖼️ تصدير كصورة PNG</button>
+                    <button id="printBtn" class="btn-primary btn-large">🖨️ طباعة</button>
+
+                    <!-- تعليمات الطباعة -->
+                    <div class="print-instructions">
+                        <h4>📋 تعليمات الطباعة المزدوجة:</h4>
+                        <ol>
+                            <li>اضغط على "طباعة" أعلاه</li>
+                            <li>تأكد من تفعيل <strong>Duplex Printing</strong></li>
+                            <li>اختر <strong>Flip on Long Edge</strong></li>
+                            <li>اضبط الهوامش على <strong>None</strong></li>
+                            <li>تأكد من توجيه الورقة بشكل صحيح</li>
+                        </ol>
+                    </div>
+
+                    <!-- أزرار إضافية -->
+                    <button id="saveTemplateBtn" class="btn-secondary">💾 حفظ القالب</button>
+                    <button id="loadTemplateBtn" class="btn-secondary">📂 تحميل القالب</button>
+                    <button id="exportHistoryBtn" class="btn-secondary">📜 سجل التصدير</button>
+                    <button id="helpBtn" class="btn-secondary">❓ مساعدة</button>
+                </div>
+            </aside>
+
+            <!-- الجانب الأيمن: معاينة البطاقة -->
+            <main class="preview-section">
+                <div class="preview-container">
+                    <!-- معاينة الأمام -->
+                    <div class="preview-card" id="frontPreview">
+                        <div class="card-label">الصورة الأمامية (Front)</div>
+                        <div class="card-canvas" id="frontCanvas">
+                            <canvas id="frontCanvasFabric"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- معاينة الخلف -->
+                    <div class="preview-card" id="backPreview" style="display:none;">
+                        <div class="card-label">الصورة الخلفية (Back)</div>
+                        <div class="card-canvas" id="backCanvas">
+                            <canvas id="backCanvasFabric"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- معاينة الطباعة -->
+                    <div class="print-preview" id="printPreview" style="display:none;">
+                        <div class="card-label">معاينة الطباعة</div>
+                        <div id="printPreviewContent" class="print-preview-content"></div>
+                    </div>
+                </div>
+
+                <!-- شريط المعلومات -->
+                <div class="info-bar">
+                    <span id="cardDimensionsInfo">الحجم: 85.6×54 mm</span>
+                    <span id="dpiInfo">الدقة: 300 DPI</span>
+                    <span id="statusInfo">جاهز</span>
+                </div>
+            </main>
+        </div>
+
+        <!-- منطقة الطباعة المخفية -->
+        <div id="printArea" style="display:none;"></div>
+    </div>
+
+    <!-- نافذة حفظ/تحميل القالب -->
+    <div id="templateModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- نافذة سجل التصدير -->
+    <div id="exportHistoryModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>📜 سجل التصدير</h3>
+            <div id="exportHistoryContent" style="max-height: 400px; overflow-y: auto;"></div>
+            <button class="btn-secondary" onclick="clearExportHistory()" style="margin-top: 1rem; width: 100%;">🗑️ مسح السجل</button>
+        </div>
+    </div>
+
+    <!-- نافذة المساعدة -->
+    <div id="helpModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>❓ مساعدة واستخدام</h3>
+            <div style="font-size: 0.95rem; line-height: 1.8; max-height: 400px; overflow-y: auto;">
+                <h4>🚀 كيفية الاستخدام:</h4>
+                <ol>
+                    <li><strong>رفع الصور:</strong> اختر صور البطاقات الأمامية والخلفية من تبويب الدفعة</li>
+                    <li><strong>تحسين الجودة:</strong> استخدم منزلقات السطوع والتباين والإشباع</li>
+                    <li><strong>النسخ السريع:</strong> استخدم زر "نسخ الأمام للخلف" لتطبيق نفس الإعدادات</li>
+                    <li><strong>الطباعة:</strong> اضغط على "طباعة الدفعة" وتأكد من تفعيل Duplex Printing</li>
+                    <li><strong>التصدير:</strong> اختر "تصدير PDF" أو "تصدير صورة"</li>
+                </ol>
+                <h4>💡 نصائح مهمة:</h4>
+                <ul style="margin-right: 1rem;">
+                    <li>استخدم قوالب جاهزة للبطاقات المختلفة</li>
+                    <li>احفظ القوالس المهمة للاستخدام لاحقاً</li>
+                    <li>افحص سجل التصدير لاسترجاع الملفات السابقة</li>
+                    <li>جرب الوضع المظلم للعمل الليلي</li>
+                </ul>
+                <h4>📋 اختصارات لوحة المفاتيح:</h4>
+                <div style="background: #f3f4f6; padding: 0.75rem; border-radius: 4px; margin-top: 0.5rem;">
+                    <div>Ctrl+S: حفظ القالب</div>
+                    <div>Shift+C: نسخ الأمام للخلف</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="helpers.js"></script>
+</body>
+</html>
